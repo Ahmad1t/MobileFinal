@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'DeviceDetails.dart';
 
 class DeviceListPage extends StatefulWidget {
   @override
@@ -29,12 +30,21 @@ class _DeviceListPageState extends State<DeviceListPage> {
               var device = snapshot.data!.docs[index];
               return ListTile(
                 title: Text(device['name']),
+                subtitle: Text((device.data() as Map<String, dynamic>)['description'] ?? 'No description available'),
                 trailing: Switch(
                   value: device['status'] ?? false,
                   onChanged: (bool newValue) {
                     devices.doc(device.id).update({'status': newValue});
                   },
                 ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DeviceDetails(deviceId: device.id),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -49,12 +59,19 @@ class _DeviceListPageState extends State<DeviceListPage> {
 
   void _showAddDeviceDialog() {
     TextEditingController nameController = TextEditingController();
+    TextEditingController descriptionController = TextEditingController();
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Enter Device Name'),
-          content: TextField(controller: nameController),
+          title: Text('Enter Device Details'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameController, decoration: InputDecoration(labelText: 'Name')),
+              TextField(controller: descriptionController, decoration: InputDecoration(labelText: 'Description')),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -63,8 +80,9 @@ class _DeviceListPageState extends State<DeviceListPage> {
             TextButton(
               onPressed: () async {
                 String deviceName = nameController.text.trim();
+                String deviceDescription = descriptionController.text.trim();
                 if (deviceName.isNotEmpty) {
-                  await devices.add({'name': deviceName, 'status': false});
+                  await devices.add({'name': deviceName, 'description': deviceDescription, 'status': false});
                 }
                 Navigator.of(context).pop();
               },

@@ -1,3 +1,5 @@
+apply plugin: 'com.google.gms.google-services'
+
 allprojects {
     repositories {
         google()
@@ -15,4 +17,16 @@ subprojects {
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
+}
+buildscript {
+    ext.kotlin_version = '1.7.10' // Ensure this matches your Kotlin version
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2' // Ensure this matches your Gradle version
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.gms:google-services:4.3.15' // Add this line for Firebase services
+    }
 }
